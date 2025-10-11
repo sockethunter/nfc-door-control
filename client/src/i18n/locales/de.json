@@ -1,0 +1,95 @@
+{
+  "common": {
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "add": "Hinzufügen",
+    "search": "Suchen",
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "doors": "Türen",
+    "tags": "Tags",
+    "history": "Verlauf"
+  },
+  "auth": {
+    "username": "Benutzername",
+    "password": "Passwort",
+    "loginButton": "Anmelden",
+    "loginFailed": "Anmeldung fehlgeschlagen",
+    "invalidCredentials": "Ungültiger Benutzername oder Passwort"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalDoors": "Türen Gesamt",
+    "activeDoors": "Aktive Türen",
+    "totalTags": "Tags Gesamt",
+    "activeTags": "Aktive Tags",
+    "recentAccess": "Kürzliche Zugriffe",
+    "accessAttempts": "Zugriffsversuche",
+    "granted": "Gewährt",
+    "denied": "Verweigert"
+  },
+  "doors": {
+    "title": "Türverwaltung",
+    "addDoor": "Tür hinzufügen",
+    "editDoor": "Tür bearbeiten",
+    "doorName": "Türname",
+    "clientId": "Client ID",
+    "location": "Standort",
+    "description": "Beschreibung",
+    "noDoors": "Keine Türen gefunden",
+    "doorAdded": "Tür erfolgreich hinzugefügt",
+    "doorUpdated": "Tür erfolgreich aktualisiert",
+    "doorDeleted": "Tür erfolgreich gelöscht",
+    "confirmDelete": "Sind Sie sicher, dass Sie diese Tür löschen möchten?"
+  },
+  "tags": {
+    "title": "Tag-Verwaltung",
+    "addTag": "Tag hinzufügen",
+    "editTag": "Tag bearbeiten",
+    "tagId": "Tag ID",
+    "tagName": "Tag Name",
+    "ownerName": "Besitzer",
+    "assignedDoors": "Zugewiesene Türen",
+    "assignToDoors": "Zu Türen zuweisen",
+    "noTags": "Keine Tags gefunden",
+    "tagAdded": "Tag erfolgreich hinzugefügt",
+    "tagUpdated": "Tag erfolgreich aktualisiert",
+    "tagDeleted": "Tag erfolgreich gelöscht",
+    "confirmDelete": "Sind Sie sicher, dass Sie diesen Tag löschen möchten?",
+    "assignmentUpdated": "Türzuweisungen erfolgreich aktualisiert"
+  },
+  "history": {
+    "title": "Zugriffsverlauf",
+    "timestamp": "Zeitstempel",
+    "door": "Tür",
+    "tag": "Tag",
+    "result": "Ergebnis",
+    "clientIp": "Client IP",
+    "noHistory": "Kein Zugriffsverlauf gefunden",
+    "accessGranted": "Zugriff gewährt",
+    "accessDenied": "Zugriff verweigert",
+    "filterByDoor": "Nach Tür filtern",
+    "filterByTag": "Nach Tag filtern",
+    "allDoors": "Alle Türen",
+    "allTags": "Alle Tags"
+  },
+  "errors": {
+    "networkError": "Netzwerkfehler aufgetreten",
+    "serverError": "Serverfehler aufgetreten",
+    "validationError": "Validierungsfehler",
+    "notFound": "Ressource nicht gefunden",
+    "unauthorized": "Nicht autorisierter Zugriff"
+  }
+}

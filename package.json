@@ -1,0 +1,40 @@
+{
+  "name": "nfc-door-control",
+  "version": "1.0.0",
+  "description": "NFC Door Control System - Server, Client and Arduino code",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "npm run start:dev --workspace=server",
+    "client:dev": "npm run dev --workspace=client",
+    "build": "npm run build --workspaces",
+    "server:build": "npm run build --workspace=server",
+    "client:build": "npm run build --workspace=client",
+    "server:start": "npm run start --workspace=server",
+    "db:setup": "npm run db:generate --workspace=server && npm run db:push --workspace=server",
+    "db:seed": "npm run db:seed --workspace=server",
+    "db:studio": "npm run db:studio --workspace=server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "nfc",
+    "door-control",
+    "iot",
+    "monorepo",
+    "nestjs",
+    "react",
+    "arduino"
+  ],
+  "author": "sockethunter",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "i18next": "^25.6.0",
+    "react-i18next": "^16.0.0"
+  }
+}

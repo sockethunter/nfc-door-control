@@ -1,0 +1,95 @@
+{
+  "common": {
+    "login": "Login",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "active": "Active",
+    "inactive": "Inactive",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "doors": "Doors",
+    "tags": "Tags",
+    "history": "History"
+  },
+  "auth": {
+    "username": "Username",
+    "password": "Password",
+    "loginButton": "Sign In",
+    "loginFailed": "Login failed",
+    "invalidCredentials": "Invalid username or password"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalDoors": "Total Doors",
+    "activeDoors": "Active Doors",
+    "totalTags": "Total Tags",
+    "activeTags": "Active Tags",
+    "recentAccess": "Recent Access",
+    "accessAttempts": "Access Attempts",
+    "granted": "Granted",
+    "denied": "Denied"
+  },
+  "doors": {
+    "title": "Door Management",
+    "addDoor": "Add Door",
+    "editDoor": "Edit Door",
+    "doorName": "Door Name",
+    "clientId": "Client ID",
+    "location": "Location",
+    "description": "Description",
+    "noDoors": "No doors found",
+    "doorAdded": "Door added successfully",
+    "doorUpdated": "Door updated successfully",
+    "doorDeleted": "Door deleted successfully",
+    "confirmDelete": "Are you sure you want to delete this door?"
+  },
+  "tags": {
+    "title": "Tag Management",
+    "addTag": "Add Tag",
+    "editTag": "Edit Tag",
+    "tagId": "Tag ID",
+    "tagName": "Tag Name",
+    "ownerName": "Owner Name",
+    "assignedDoors": "Assigned Doors",
+    "assignToDoors": "Assign to Doors",
+    "noTags": "No tags found",
+    "tagAdded": "Tag added successfully",
+    "tagUpdated": "Tag updated successfully",
+    "tagDeleted": "Tag deleted successfully",
+    "confirmDelete": "Are you sure you want to delete this tag?",
+    "assignmentUpdated": "Door assignments updated successfully"
+  },
+  "history": {
+    "title": "Access History",
+    "timestamp": "Timestamp",
+    "door": "Door",
+    "tag": "Tag",
+    "result": "Result",
+    "clientIp": "Client IP",
+    "noHistory": "No access history found",
+    "accessGranted": "Access Granted",
+    "accessDenied": "Access Denied",
+    "filterByDoor": "Filter by Door",
+    "filterByTag": "Filter by Tag",
+    "allDoors": "All Doors",
+    "allTags": "All Tags"
+  },
+  "errors": {
+    "networkError": "Network error occurred",
+    "serverError": "Server error occurred",
+    "validationError": "Validation error",
+    "notFound": "Resource not found",
+    "unauthorized": "Unauthorized access"
+  }
+}

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025 sockethunter
  *
- * This file is part of nfc-door-control 
+ * This file is part of nfc-door-control
  * (see https://github.com/sockethunter/nfc-door-control).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,9 +20,18 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// WiFi Configuration
-const char* WIFI_SSID = "SSID";
-const char* WIFI_PASSWORD = "PASSWORD";
+// Network Configuration - Uncomment to use Ethernet instead of WiFi
+// #define USE_ETHERNET
+
+#ifdef USE_ETHERNET
+  // Ethernet Configuration
+  byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  // MAC address
+  IPAddress ip(192, 168, 178, 100);  // Static IP (optional, comment out for DHCP)
+#else
+  // WiFi Configuration
+  const char* WIFI_SSID = "SSID";
+  const char* WIFI_PASSWORD = "PASSWORD";
+#endif
 
 // Server Configuration
 const char* SERVER_URL = "http://192.168.178.27:3005";  // Change to your server IP
@@ -40,7 +49,7 @@ const char* CLIENT_ID = "door-001";  // Unique client identifier
 // Timing Configuration
 #define DOOR_UNLOCK_TIME 3000    // Time door stays unlocked (ms)
 #define CARD_READ_DELAY  1000    // Delay between card reads (ms)
-#define WIFI_TIMEOUT     10000   // WiFi connection timeout (ms)
+#define NETWORK_TIMEOUT  10000   // Network connection timeout (ms)
 #define HTTP_TIMEOUT     5000    // HTTP request timeout (ms)
 
 // Debug Configuration

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025 sockethunter
  *
- * This file is part of nfc-door-control 
+ * This file is part of nfc-door-control
  * (see https://github.com/sockethunter/nfc-door-control).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,15 +17,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <WiFi.h>
+#include "config.h"
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <MFRC522.h>
 #include <SPI.h>
-#include "config.h"
+
+#ifdef USE_ETHERNET
+  #include <Ethernet.h>
+  EthernetClient networkClient;
+#else
+  #include <WiFi.h>
+  WiFiClient networkClient;
+#endif
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-WiFiClient wifiClient;
 HTTPClient http;
 
 unsigned long lastCardTime = 0;
@@ -53,9 +59,9 @@ void setup() {
   // Initialize SPI and MFRC522
   SPI.begin();
   mfrc522.PCD_Init();
-  
-  // Connect to WiFi
-  connectToWiFi();
+
+  // Connect to network
+  connectToNetwork();
   
   if (DEBUG_SERIAL) {
     Serial.println("System ready. Waiting for NFC cards...");
@@ -66,13 +72,22 @@ void setup() {
 }
 
 void loop() {
-  // Check WiFi connection
-  if (WiFi.status() != WL_CONNECTED) {
-    if (DEBUG_SERIAL) {
-      Serial.println("WiFi disconnected. Reconnecting...");
+  // Check network connection
+  #ifdef USE_ETHERNET
+    if (Ethernet.linkStatus() == LinkOFF) {
+      if (DEBUG_SERIAL) {
+        Serial.println("Ethernet disconnected. Reconnecting...");
+      }
+      connectToNetwork();
     }
-    connectToWiFi();
-  }
+  #else
+    if (WiFi.status() != WL_CONNECTED) {
+      if (DEBUG_SERIAL) {
+        Serial.println("WiFi disconnected. Reconnecting...");
+      }
+      connectToNetwork();
+    }
+  #endif
   
   // Check if door should be locked again
   if (!doorLocked && millis() - doorUnlockTime > DOOR_UNLOCK_TIME) {
@@ -94,33 +109,66 @@ void loop() {
   delay(100);
 }
 
-void connectToWiFi() {
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  
-  if (DEBUG_SERIAL) {
-    Serial.print("Connecting to WiFi");
-  }
-  
-  unsigned long startTime = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - startTime < WIFI_TIMEOUT) {
-    delay(500);
+void connectToNetwork() {
+  #ifdef USE_ETHERNET
     if (DEBUG_SERIAL) {
-      Serial.print(".");
+      Serial.print("Connecting to Ethernet");
     }
-  }
-  
-  if (WiFi.status() == WL_CONNECTED) {
+
+    #ifdef ip
+      Ethernet.begin(mac, ip);
+    #else
+      Ethernet.begin(mac);
+    #endif
+
+    unsigned long startTime = millis();
+    while (Ethernet.linkStatus() == LinkOFF && millis() - startTime < NETWORK_TIMEOUT) {
+      delay(500);
+      if (DEBUG_SERIAL) {
+        Serial.print(".");
+      }
+    }
+
+    if (Ethernet.linkStatus() == LinkON) {
+      if (DEBUG_SERIAL) {
+        Serial.println();
+        Serial.print("Ethernet connected! IP: ");
+        Serial.println(Ethernet.localIP());
+      }
+    } else {
+      if (DEBUG_SERIAL) {
+        Serial.println();
+        Serial.println("Ethernet connection failed!");
+      }
+    }
+  #else
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
     if (DEBUG_SERIAL) {
-      Serial.println();
-      Serial.print("WiFi connected! IP: ");
-      Serial.println(WiFi.localIP());
+      Serial.print("Connecting to WiFi");
     }
-  } else {
-    if (DEBUG_SERIAL) {
-      Serial.println();
-      Serial.println("WiFi connection failed!");
+
+    unsigned long startTime = millis();
+    while (WiFi.status() != WL_CONNECTED && millis() - startTime < NETWORK_TIMEOUT) {
+      delay(500);
+      if (DEBUG_SERIAL) {
+        Serial.print(".");
+      }
     }
-  }
+
+    if (WiFi.status() == WL_CONNECTED) {
+      if (DEBUG_SERIAL) {
+        Serial.println();
+        Serial.print("WiFi connected! IP: ");
+        Serial.println(WiFi.localIP());
+      }
+    } else {
+      if (DEBUG_SERIAL) {
+        Serial.println();
+        Serial.println("WiFi connection failed!");
+      }
+    }
+  #endif
 }
 
 void handleNFCCard() {
@@ -154,14 +202,23 @@ String getTagId() {
 }
 
 bool validateTag(String tagId) {
-  if (WiFi.status() != WL_CONNECTED) {
-    if (DEBUG_SERIAL) {
-      Serial.println("No WiFi connection - access denied");
+  #ifdef USE_ETHERNET
+    if (Ethernet.linkStatus() == LinkOFF) {
+      if (DEBUG_SERIAL) {
+        Serial.println("No Ethernet connection - access denied");
+      }
+      return false;
     }
-    return false;
-  }
-  
-  http.begin(wifiClient, String(SERVER_URL) + "/tags/validate");
+  #else
+    if (WiFi.status() != WL_CONNECTED) {
+      if (DEBUG_SERIAL) {
+        Serial.println("No WiFi connection - access denied");
+      }
+      return false;
+    }
+  #endif
+
+  http.begin(networkClient, String(SERVER_URL) + "/tags/validate");
   http.addHeader("Content-Type", "application/json");
   http.setTimeout(HTTP_TIMEOUT);
   

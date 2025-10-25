@@ -219,7 +219,8 @@ bool validateTag(String tagId) {
     networkClient.print("Content-Length: ");
     networkClient.println(payload.length());
     networkClient.println();
-    networkClient.println(payload);
+    networkClient.print(payload);
+    networkClient.flush();  // Make sure all data is sent
 
     if (DEBUG_SERIAL) {
       Serial.println("Request sent, waiting for response...");

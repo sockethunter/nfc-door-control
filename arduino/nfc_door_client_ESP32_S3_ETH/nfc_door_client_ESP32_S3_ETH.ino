@@ -424,6 +424,16 @@ void initCamera() {
 }
 
 String captureImageBase64() {
+  // Clear old frames from buffer by capturing and discarding 2-3 frames
+  for (int i = 0; i < 3; i++) {
+    camera_fb_t *fb_discard = esp_camera_fb_get();
+    if (fb_discard) {
+      esp_camera_fb_return(fb_discard);
+    }
+    delay(10);  // Small delay between frames
+  }
+
+  // Now capture the actual fresh frame
   camera_fb_t *fb = esp_camera_fb_get();
   if (!fb) {
     if (DEBUG_SERIAL) {

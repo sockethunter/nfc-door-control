@@ -169,13 +169,12 @@ bool validateTag(String tagId) {
     return false;
   }
 
-  // Create JSON payload
-  DynamicJsonDocument doc(16384);  // Larger size for optional image (16KB)
+  // Create JSON document
+  DynamicJsonDocument doc(16384);
   doc["tagId"] = tagId;
   doc["clientId"] = CLIENT_ID;
 
 #ifdef ENABLE_CAMERA
-  // Capture and add image if camera is enabled
   if (DEBUG_SERIAL) {
     Serial.println("Capturing image...");
     Serial.print("Free heap before: ");
@@ -187,91 +186,118 @@ bool validateTag(String tagId) {
   if (DEBUG_SERIAL) {
     Serial.print("Free heap after: ");
     Serial.println(ESP.getFreeHeap());
-    Serial.print("Image size: ");
+    Serial.print("Base64 length: ");
     Serial.println(imageBase64.length());
   }
 
   if (imageBase64.length() > 0) {
     doc["image"] = imageBase64;
-    if (DEBUG_SERIAL) {
-      Serial.println("Image added to payload");
-    }
   }
 #endif
 
-  String payload;
-  serializeJson(doc, payload);
+  // Measure JSON size for Content-Length (no String copy!)
+  size_t contentLen = measureJson(doc);
 
   if (DEBUG_SERIAL) {
-    Serial.print("Sending request (payload size: ");
-    Serial.print(payload.length());
-    Serial.println(" bytes)");
+    Serial.print("Connecting to ");
+    Serial.print(SERVER_HOST);
+    Serial.print(":");
+    Serial.println(SERVER_PORT);
+    Serial.print("Content-Length: ");
+    Serial.println(contentLen);
   }
 
-  bool accessGranted = false;
-
-  // Manual HTTP request for Ethernet
-  if (networkClient.connect(SERVER_HOST, SERVER_PORT)) {
-    networkClient.println("POST /tags/validate HTTP/1.1");
-    networkClient.println("Host: " + String(SERVER_HOST));
-    networkClient.println("Content-Type: application/json");
-    networkClient.println("Connection: close");
-    networkClient.print("Content-Length: ");
-    networkClient.println(payload.length());
-    networkClient.println();
-    networkClient.print(payload);
-    networkClient.flush();  // Make sure all data is sent
-
-    if (DEBUG_SERIAL) {
-      Serial.println("Request sent, waiting for response...");
-    }
-
-    // Wait for response with timeout
-    unsigned long timeout = millis();
-    while (networkClient.connected() && !networkClient.available()) {
-      if (millis() - timeout > 10000) {  // 10 second timeout
-        if (DEBUG_SERIAL) {
-          Serial.println("Response timeout!");
-        }
-        networkClient.stop();
-        return false;
-      }
-      delay(10);
-    }
-
-    bool headersPassed = false;
-    String response = "";
-    timeout = millis();
-    while (networkClient.available() || (networkClient.connected() && (millis() - timeout < 5000))) {
-      if (networkClient.available()) {
-        String line = networkClient.readStringUntil('\n');
-        timeout = millis();  // Reset timeout on data received
-        if (line == "\r") {
-          headersPassed = true;
-        } else if (headersPassed) {
-          response += line;
-        }
-      }
-      delay(1);
-    }
-
-    networkClient.stop();
-
-    if (DEBUG_SERIAL) {
-      Serial.print("Server response: ");
-      Serial.println(response);
-    }
-
-    DynamicJsonDocument responseDoc(201);
-    deserializeJson(responseDoc, response);
-    accessGranted = responseDoc["allowed"] | false;
-  } else {
+  if (!networkClient.connect(SERVER_HOST, SERVER_PORT)) {
     if (DEBUG_SERIAL) {
       Serial.println("Connection failed");
     }
+    return false;
   }
 
-  return accessGranted;
+  networkClient.setTimeout(15000);
+
+  if (DEBUG_SERIAL) {
+    Serial.println("Connected! Sending request...");
+  }
+
+  // Send HTTP headers
+  networkClient.print(
+    String("POST /tags/validate HTTP/1.1\r\n") +
+    "Host: " + String(SERVER_HOST) + "\r\n" +
+    "Content-Type: application/json\r\n" +
+    "Connection: close\r\n" +
+    "Content-Length: " + String(contentLen) + "\r\n" +
+    "\r\n"
+  );
+
+  // Stream JSON directly to socket (no String copy!)
+  serializeJson(doc, networkClient);
+
+  if (DEBUG_SERIAL) {
+    Serial.println("Request sent, waiting for response...");
+  }
+
+  // Read response headers until \r\n\r\n
+  String header;
+  unsigned long t0 = millis();
+  while (millis() - t0 < 15000) {
+    while (networkClient.available()) {
+      char c = networkClient.read();
+      header += c;
+      if (header.endsWith("\r\n\r\n")) goto headers_done;
+    }
+    if (!networkClient.connected()) break;
+    delay(1);
+  }
+headers_done:
+
+  if (DEBUG_SERIAL) {
+    Serial.println("Response headers:");
+    Serial.println(header);
+  }
+
+  // Extract status code
+  int statusCode = 0;
+  int idx = header.indexOf(" ");
+  if (idx >= 0) {
+    statusCode = header.substring(idx + 1).toInt();
+  }
+
+  // Read response body
+  String body;
+  t0 = millis();
+  while (millis() - t0 < 5000) {
+    while (networkClient.available()) {
+      char c = networkClient.read();
+      body += c;
+      t0 = millis();
+    }
+    if (!networkClient.connected()) break;
+    delay(1);
+  }
+
+  networkClient.stop();
+
+  if (DEBUG_SERIAL) {
+    Serial.print("HTTP status: ");
+    Serial.println(statusCode);
+    Serial.print("Server body: ");
+    Serial.println(body);
+  }
+
+  // Parse JSON response
+  DynamicJsonDocument responseDoc(256);
+  DeserializationError err = deserializeJson(responseDoc, body);
+  if (err) {
+    if (DEBUG_SERIAL) {
+      Serial.print("JSON parse error: ");
+      Serial.println(err.c_str());
+    }
+    return false;
+  }
+
+  bool allowed = responseDoc["allowed"] | false;
+  return allowed;
 }
 
 void unlockDoor() {

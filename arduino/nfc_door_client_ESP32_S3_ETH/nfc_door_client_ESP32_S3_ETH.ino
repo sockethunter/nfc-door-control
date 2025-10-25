@@ -170,17 +170,31 @@ bool validateTag(String tagId) {
   }
 
   // Create JSON payload
-  DynamicJsonDocument doc(8192);  // Larger size for optional image
+  DynamicJsonDocument doc(16384);  // Larger size for optional image (16KB)
   doc["tagId"] = tagId;
   doc["clientId"] = CLIENT_ID;
 
 #ifdef ENABLE_CAMERA
   // Capture and add image if camera is enabled
+  if (DEBUG_SERIAL) {
+    Serial.println("Capturing image...");
+    Serial.print("Free heap before: ");
+    Serial.println(ESP.getFreeHeap());
+  }
+
   String imageBase64 = captureImageBase64();
+
+  if (DEBUG_SERIAL) {
+    Serial.print("Free heap after: ");
+    Serial.println(ESP.getFreeHeap());
+    Serial.print("Image size: ");
+    Serial.println(imageBase64.length());
+  }
+
   if (imageBase64.length() > 0) {
     doc["image"] = imageBase64;
     if (DEBUG_SERIAL) {
-      Serial.println("Image captured and added to payload");
+      Serial.println("Image added to payload");
     }
   }
 #endif
@@ -329,19 +343,19 @@ void initCamera() {
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
-  config.frame_size = FRAMESIZE_QVGA;  // Small size for payload
+  config.frame_size = FRAMESIZE_QQVGA;  // Very small size to avoid memory issues (160x120)
   config.pixel_format = PIXFORMAT_JPEG;
   config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
   config.fb_location = CAMERA_FB_IN_PSRAM;
-  config.jpeg_quality = 12;
+  config.jpeg_quality = 20;  // Higher value = lower quality = smaller size
   config.fb_count = 1;
 
   if (psramFound()) {
-    config.jpeg_quality = 10;
+    config.jpeg_quality = 15;  // Moderate compression for PSRAM
     config.fb_count = 2;
     config.grab_mode = CAMERA_GRAB_LATEST;
+    config.frame_size = FRAMESIZE_QVGA;  // Can use larger size with PSRAM
   } else {
-    config.frame_size = FRAMESIZE_QQVGA;
     config.fb_location = CAMERA_FB_IN_DRAM;
   }
 
@@ -374,8 +388,27 @@ String captureImageBase64() {
     return "";
   }
 
-  String imageBase64 = base64::encode(fb->buf, fb->len);
+  if (DEBUG_SERIAL) {
+    Serial.print("Captured frame size: ");
+    Serial.print(fb->len);
+    Serial.println(" bytes");
+  }
+
+  // Reserve memory for base64 string (base64 is ~1.33x larger than binary)
+  String imageBase64;
+  imageBase64.reserve((fb->len * 4) / 3 + 4);
+
+  // Encode to base64
+  imageBase64 = base64::encode(fb->buf, fb->len);
+
+  // Return framebuffer immediately after encoding
   esp_camera_fb_return(fb);
+
+  if (DEBUG_SERIAL) {
+    Serial.print("Base64 string size: ");
+    Serial.print(imageBase64.length());
+    Serial.println(" bytes");
+  }
 
   return imageBase64;
 }

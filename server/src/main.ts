@@ -37,7 +37,7 @@ async function bootstrap() {
   app.useGlobalFilters(new ValidationExceptionFilter());
   app.enableCors();
   
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 3005;
   await app.listen(port);
   
   console.log(`NFC Door Control API running on port ${port}`);

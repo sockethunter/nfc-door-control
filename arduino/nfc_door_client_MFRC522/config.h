@@ -34,8 +34,10 @@
 #endif
 
 // Server Configuration
-const char* SERVER_URL = "http://192.168.178.27:3005";  // Change to your server IP
-const char* CLIENT_ID = "door-001";  // Unique client identifier
+// NOTE: Only HTTP is currently supported (not HTTPS)
+const char* SERVER_HOST = "192.168.178.27";  // Server IP or hostname
+const int SERVER_PORT = 3005;                 // Server port
+const char* CLIENT_ID = "door-001";           // Unique client identifier
 
 // Hardware Pins
 #define RST_PIN         22

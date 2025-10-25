@@ -218,10 +218,6 @@ bool validateTag(String tagId) {
     }
   #endif
 
-  http.begin(networkClient, String(SERVER_URL) + "/tags/validate");
-  http.addHeader("Content-Type", "application/json");
-  http.setTimeout(HTTP_TIMEOUT);
-
   // Create JSON payload
   DynamicJsonDocument doc(201);
   doc["tagId"] = tagId;
@@ -235,29 +231,83 @@ bool validateTag(String tagId) {
     Serial.println(payload);
   }
 
-  int httpResponseCode = http.POST(payload);
   bool accessGranted = false;
 
-  if (httpResponseCode == 201) {
-    String response = http.getString();
+  #ifdef USE_ETHERNET
+    // Manual HTTP request for Ethernet
+    // Parse host and port from SERVER_HOST and SERVER_PORT
+    if (networkClient.connect(SERVER_HOST, SERVER_PORT)) {
+      networkClient.println("POST /tags/validate HTTP/1.1");
+      networkClient.println("Host: " + String(SERVER_HOST));
+      networkClient.println("Content-Type: application/json");
+      networkClient.println("Connection: close");
+      networkClient.print("Content-Length: ");
+      networkClient.println(payload.length());
+      networkClient.println();
+      networkClient.println(payload);
 
-    if (DEBUG_SERIAL) {
-      Serial.print("Server response: ");
-      Serial.println(response);
+      // Read response
+      while (networkClient.connected() && !networkClient.available()) {
+        delay(1);
+      }
+
+      bool headersPassed = false;
+      String response = "";
+      while (networkClient.available()) {
+        String line = networkClient.readStringUntil('\n');
+        if (line == "\r") {
+          headersPassed = true;
+        } else if (headersPassed) {
+          response += line;
+        }
+      }
+
+      networkClient.stop();
+
+      if (DEBUG_SERIAL) {
+        Serial.print("Server response: ");
+        Serial.println(response);
+      }
+
+      DynamicJsonDocument responseDoc(201);
+      deserializeJson(responseDoc, response);
+      accessGranted = responseDoc["allowed"] | false;
+    } else {
+      if (DEBUG_SERIAL) {
+        Serial.println("Connection failed");
+      }
+    }
+  #else
+    // Use HTTPClient for WiFi
+    String url = "http://" + String(SERVER_HOST) + ":" + String(SERVER_PORT) + "/tags/validate";
+    http.begin(networkClient, url);
+    http.addHeader("Content-Type", "application/json");
+    http.setTimeout(HTTP_TIMEOUT);
+
+    int httpResponseCode = http.POST(payload);
+
+    if (httpResponseCode == 201) {
+      String response = http.getString();
+
+      if (DEBUG_SERIAL) {
+        Serial.print("Server response: ");
+        Serial.println(response);
+      }
+
+      DynamicJsonDocument responseDoc(201);
+      deserializeJson(responseDoc, response);
+
+      accessGranted = responseDoc["allowed"] | false;
+    } else {
+      if (DEBUG_SERIAL) {
+        Serial.print("HTTP Error: ");
+        Serial.println(httpResponseCode);
+      }
     }
 
-    DynamicJsonDocument responseDoc(201);
-    deserializeJson(responseDoc, response);
+    http.end();
+  #endif
 
-    accessGranted = responseDoc["allowed"] | false;
-  } else {
-    if (DEBUG_SERIAL) {
-      Serial.print("HTTP Error: ");
-      Serial.println(httpResponseCode);
-    }
-  }
-
-  http.end();
   return accessGranted;
 }
 

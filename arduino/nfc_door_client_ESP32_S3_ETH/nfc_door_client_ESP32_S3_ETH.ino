@@ -221,20 +221,37 @@ bool validateTag(String tagId) {
     networkClient.println();
     networkClient.println(payload);
 
-    // Read response
+    if (DEBUG_SERIAL) {
+      Serial.println("Request sent, waiting for response...");
+    }
+
+    // Wait for response with timeout
+    unsigned long timeout = millis();
     while (networkClient.connected() && !networkClient.available()) {
-      delay(1);
+      if (millis() - timeout > 10000) {  // 10 second timeout
+        if (DEBUG_SERIAL) {
+          Serial.println("Response timeout!");
+        }
+        networkClient.stop();
+        return false;
+      }
+      delay(10);
     }
 
     bool headersPassed = false;
     String response = "";
-    while (networkClient.available()) {
-      String line = networkClient.readStringUntil('\n');
-      if (line == "\r") {
-        headersPassed = true;
-      } else if (headersPassed) {
-        response += line;
+    timeout = millis();
+    while (networkClient.available() || (networkClient.connected() && (millis() - timeout < 5000))) {
+      if (networkClient.available()) {
+        String line = networkClient.readStringUntil('\n');
+        timeout = millis();  // Reset timeout on data received
+        if (line == "\r") {
+          headersPassed = true;
+        } else if (headersPassed) {
+          response += line;
+        }
       }
+      delay(1);
     }
 
     networkClient.stop();

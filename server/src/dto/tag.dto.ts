@@ -56,4 +56,8 @@ export class ValidateTagDto {
   @IsString()
   @IsNotEmpty()
   clientId: string;
+
+  @IsString()
+  @IsOptional()
+  image?: string;  // Base64 encoded image
 }

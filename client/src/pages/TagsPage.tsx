@@ -21,7 +21,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { tagsApi, doorsApi } from '../services/api';
-import { NfcTag, Door } from '../types';
+import { NfcTag } from '../types';
 import { Button, Input, Card, Badge } from '../components/atoms';
 import { TagCard } from '../components/molecules';
 

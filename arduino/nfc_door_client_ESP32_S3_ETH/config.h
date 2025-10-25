@@ -54,6 +54,29 @@ const char* CLIENT_ID = "door-001";           // Unique client identifier
 #define SDA_PIN         21  // Default I2C SDA pin for ESP32
 #define SCL_PIN         22  // Default I2C SCL pin for ESP32
 
+// Camera Configuration (Optional - uncomment to enable camera)
+// #define ENABLE_CAMERA
+#ifdef ENABLE_CAMERA
+  #define PWDN_GPIO_NUM  -1
+  #define RESET_GPIO_NUM -1
+  #define XCLK_GPIO_NUM  3
+  #define SIOD_GPIO_NUM  48
+  #define SIOC_GPIO_NUM  47
+  #define Y9_GPIO_NUM    18
+  #define Y8_GPIO_NUM    15
+  #define Y7_GPIO_NUM    38
+  #define Y6_GPIO_NUM    40
+  #define Y5_GPIO_NUM    42
+  #define Y4_GPIO_NUM    46
+  #define Y3_GPIO_NUM    45
+  #define Y2_GPIO_NUM    41
+  #define VSYNC_GPIO_NUM 1
+  #define HREF_GPIO_NUM  2
+  #define PCLK_GPIO_NUM  39
+  #define CAM_ENABLE     8
+  #define IR_FILTER_NUM  4  // Infrared filter control
+#endif
+
 // Timing Configuration
 #define DOOR_UNLOCK_TIME 3000    // Time door stays unlocked (ms)
 #define CARD_READ_DELAY  1000    // Delay between card reads (ms)

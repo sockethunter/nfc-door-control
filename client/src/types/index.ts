@@ -70,6 +70,7 @@ export interface AccessHistory {
   accessGranted: boolean;
   timestamp: string;
   clientIp?: string;
+  image?: string;
   door: Door;
 }
 

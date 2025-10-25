@@ -28,7 +28,7 @@ export class TagsController {
 
   @Post('validate')
   async validateAccess(@Body() validateDto: ValidateTagDto) {
-    const result = await this.tagsService.validateTagAccess(validateDto.tagId, validateDto.clientId);
+    const result = await this.tagsService.validateTagAccess(validateDto.tagId, validateDto.clientId, validateDto.image);
     return result;
   }
 

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -141,6 +141,9 @@ export const HistoryPage: React.FC = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       {t('history.clientIp')}
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Image
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -173,6 +176,25 @@ export const HistoryPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {entry.clientIp || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {entry.image ? (
+                          <img
+                            src={`data:image/jpeg;base64,${entry.image}`}
+                            alt="Access attempt"
+                            className="h-16 w-16 object-cover rounded cursor-pointer hover:scale-150 transition-transform"
+                            onClick={(e) => {
+                              const img = e.target as HTMLImageElement;
+                              const modal = document.createElement('div');
+                              modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 cursor-pointer';
+                              modal.innerHTML = `<img src="${img.src}" class="max-w-full max-h-full" />`;
+                              modal.onclick = () => modal.remove();
+                              document.body.appendChild(modal);
+                            }}
+                          />
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
                       </td>
                     </tr>
                   ))}

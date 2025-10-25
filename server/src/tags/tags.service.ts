@@ -24,7 +24,7 @@ import { PrismaService } from '../database/prisma.service';
 export class TagsService {
   constructor(private prisma: PrismaService) {}
 
-  async validateTagAccess(tagId: string, clientId: string): Promise<{ allowed: boolean; doorId?: number }> {
+  async validateTagAccess(tagId: string, clientId: string, image?: string): Promise<{ allowed: boolean; doorId?: number }> {
     const door = await this.prisma.door.findUnique({
       where: { clientId, isActive: true },
     });
@@ -47,6 +47,7 @@ export class TagsService {
               tagId,
               accessGranted: false,
               clientIp: null,
+              image: image || null,
             },
           });
         } catch (error) {
@@ -80,6 +81,7 @@ export class TagsService {
           tagId,
           accessGranted: allowed,
           clientIp: null,
+          image: image || null,
         },
       });
     } catch (error) {

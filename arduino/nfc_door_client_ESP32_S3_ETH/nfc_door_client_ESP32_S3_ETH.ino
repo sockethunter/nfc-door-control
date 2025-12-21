@@ -124,12 +124,7 @@ void loop() {
   }
 
   // Only process normal operations if alarm is not active
-  if (!alarmActive) {if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)) {
-      if (millis() - lastCardTime > CARD_READ_DELAY) {
-        handleNFCCard(uid, uidLength);
-        lastCardTime = millis();
-      }
-    }
+  if (!alarmActive) {
     // Check Ethernet connection
     if (Ethernet.linkStatus() == LinkOFF) {
       if (DEBUG_SERIAL) {

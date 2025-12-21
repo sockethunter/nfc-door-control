@@ -65,6 +65,7 @@ void setup() {
   Wire.begin(SDA_PIN, SCL_PIN);
   nfc.begin();
   nfc.SAMConfig();
+  nfc.setPassiveActivationRetries(0x01);
 
   // Connect to network
   connectToNetwork();
@@ -123,7 +124,12 @@ void loop() {
   }
 
   // Only process normal operations if alarm is not active
-  if (!alarmActive) {
+  if (!alarmActive) {if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)) {
+      if (millis() - lastCardTime > CARD_READ_DELAY) {
+        handleNFCCard(uid, uidLength);
+        lastCardTime = millis();
+      }
+    }
     // Check Ethernet connection
     if (Ethernet.linkStatus() == LinkOFF) {
       if (DEBUG_SERIAL) {

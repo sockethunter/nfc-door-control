@@ -20,12 +20,11 @@
 import { Module } from '@nestjs/common';
 import { AlarmController } from './alarm.controller';
 import { AlarmService } from './alarm.service';
-import { DatabaseModule } from '../database/database.module';
+import { PrismaService } from '../database/prisma.service';
 
 @Module({
-  imports: [DatabaseModule],
   controllers: [AlarmController],
-  providers: [AlarmService],
+  providers: [AlarmService, PrismaService],
   exports: [AlarmService],
 })
 export class AlarmModule {}

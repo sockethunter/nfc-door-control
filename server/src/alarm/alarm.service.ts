@@ -18,14 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import { Injectable, Logger } from '@nestjs/common';
-import { DatabaseService } from '../database/database.service';
+import { PrismaService } from '../database/prisma.service';
 import { ReportTamperDto, UpdateTamperLogDto } from '../dto/alarm.dto';
 
 @Injectable()
 export class AlarmService {
   private readonly logger = new Logger(AlarmService.name);
 
-  constructor(private readonly db: DatabaseService) {}
+  constructor(private readonly db: PrismaService) {}
 
   async reportTamper(reportDto: ReportTamperDto) {
     this.logger.warn(`Tamper attempt reported from client: ${reportDto.clientId}`);

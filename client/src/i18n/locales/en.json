@@ -20,7 +20,8 @@
     "dashboard": "Dashboard",
     "doors": "Doors",
     "tags": "Tags",
-    "history": "History"
+    "history": "History",
+    "alarms": "Alarms"
   },
   "auth": {
     "username": "Username",
@@ -84,6 +85,25 @@
     "filterByTag": "Filter by Tag",
     "allDoors": "All Doors",
     "allTags": "All Tags"
+  },
+  "alarms": {
+    "title": "Tamper Alarms",
+    "subtitle": "Monitor and manage tamper attempts",
+    "totalAlarms": "Total Alarms",
+    "unresolved": "Unresolved",
+    "resolved": "Resolved",
+    "unresolvedOnly": "Unresolved Only",
+    "allAlarms": "All Alarms",
+    "client": "Client",
+    "viewImage": "View Image",
+    "resolve": "Resolve",
+    "noAlarms": "No tamper alarms found",
+    "resolveTitle": "Resolve Tamper Alarm",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "Add any notes about the resolution...",
+    "confirm": "Confirm",
+    "resolving": "Resolving...",
+    "confirmDelete": "Are you sure you want to delete this alarm?"
   },
   "errors": {
     "networkError": "Network error occurred",

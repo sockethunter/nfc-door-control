@@ -43,6 +43,7 @@ export const Navigation: React.FC<NavigationProps> = ({
     { path: '/doors', label: t('navigation.doors'), icon: '🚪' },
     { path: '/tags', label: t('navigation.tags'), icon: '🏷️' },
     { path: '/history', label: t('navigation.history'), icon: '📈' },
+    { path: '/alarms', label: t('navigation.alarms'), icon: '🚨' },
   ];
 
   return (

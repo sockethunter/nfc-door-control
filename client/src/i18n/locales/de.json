@@ -20,7 +20,8 @@
     "dashboard": "Dashboard",
     "doors": "Türen",
     "tags": "Tags",
-    "history": "Verlauf"
+    "history": "Verlauf",
+    "alarms": "Alarme"
   },
   "auth": {
     "username": "Benutzername",
@@ -84,6 +85,25 @@
     "filterByTag": "Nach Tag filtern",
     "allDoors": "Alle Türen",
     "allTags": "Alle Tags"
+  },
+  "alarms": {
+    "title": "Manipulations-Alarme",
+    "subtitle": "Überwachen und verwalten Sie Manipulationsversuche",
+    "totalAlarms": "Alarme Gesamt",
+    "unresolved": "Ungelöst",
+    "resolved": "Gelöst",
+    "unresolvedOnly": "Nur Ungelöste",
+    "allAlarms": "Alle Alarme",
+    "client": "Client",
+    "viewImage": "Bild ansehen",
+    "resolve": "Lösen",
+    "noAlarms": "Keine Manipulations-Alarme gefunden",
+    "resolveTitle": "Manipulations-Alarm lösen",
+    "notes": "Notizen (optional)",
+    "notesPlaceholder": "Fügen Sie Notizen zur Lösung hinzu...",
+    "confirm": "Bestätigen",
+    "resolving": "Wird gelöst...",
+    "confirmDelete": "Sind Sie sicher, dass Sie diesen Alarm löschen möchten?"
   },
   "errors": {
     "networkError": "Netzwerkfehler aufgetreten",

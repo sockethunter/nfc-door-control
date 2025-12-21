@@ -74,3 +74,14 @@ model AccessHistory {
 
   @@map("access_history")
 }
+
+model TamperLog {
+  id        Int      @id @default(autoincrement())
+  clientId  String
+  timestamp DateTime @default(now())
+  image     String?  // Base64 encoded image from camera
+  resolved  Boolean  @default(false)
+  notes     String?
+
+  @@map("tamper_logs")
+}

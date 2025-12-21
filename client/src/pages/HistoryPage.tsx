@@ -23,6 +23,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { accessHistoryApi } from '../services/api';
 import { Card, Badge, Button } from '../components/atoms';
+import { formatDateTime } from '../utils/dateTime';
 
 export const HistoryPage: React.FC = () => {
   const { t } = useTranslation();
@@ -40,17 +41,6 @@ export const HistoryPage: React.FC = () => {
       return accessHistoryApi.getAll(page, limit);
     },
   });
-
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('de-DE', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
 
   if (isLoading) {
     return (

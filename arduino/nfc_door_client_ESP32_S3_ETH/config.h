@@ -83,6 +83,10 @@ const char* CLIENT_ID = "door-001";           // Unique client identifier
 #define NETWORK_TIMEOUT  10000   // Network connection timeout (ms)
 #define HTTP_TIMEOUT     5000    // HTTP request timeout (ms)
 
+// Alarm Configuration
+#define ALARM_DURATION       300000  // Alarm duration when contact is lost (ms) - 5 minutes
+#define ALARM_BLINK_INTERVAL 500     // Blink interval for alarm (ms)
+
 // Debug Configuration
 #define DEBUG_SERIAL     true
 #define SERIAL_BAUD      115200

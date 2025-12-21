@@ -37,6 +37,12 @@ unsigned long lastCardTime = 0;
 bool doorLocked = true;
 unsigned long doorUnlockTime = 0;
 
+// Alarm system variables
+bool alarmActive = false;
+unsigned long alarmStartTime = 0;
+unsigned long lastAlarmBlinkTime = 0;
+bool alarmBlinkState = false;
+
 void setup() {
   if (DEBUG_SERIAL) {
     Serial.begin(SERIAL_BAUD);
@@ -48,7 +54,7 @@ void setup() {
   pinMode(LED_GREEN_PIN, OUTPUT);
   pinMode(LED_RED_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(CONTACT_PIN, INPUT);
+  pinMode(CONTACT_PIN, INPUT_PULLUP);  // Pullup for alarm contact (HIGH = normal)
 
   // Initial state
   digitalWrite(RELAY_PIN, LOW);   // Door locked
@@ -77,27 +83,69 @@ void setup() {
 }
 
 void loop() {
-  // Check Ethernet connection
-  if (Ethernet.linkStatus() == LinkOFF) {
-    if (DEBUG_SERIAL) {
-      Serial.println("Ethernet disconnected. Reconnecting...");
+  // Check alarm contact (LOW = contact lost, trigger alarm)
+  if (digitalRead(CONTACT_PIN) == LOW) {
+    if (!alarmActive) {
+      // Start alarm
+      alarmActive = true;
+      alarmStartTime = millis();
+      if (DEBUG_SERIAL) {
+        Serial.println("ALARM! Contact lost - activating alarm for 5 minutes");
+      }
+
+      // Report tamper attempt to server
+      reportTamperAttempt();
     }
-    connectToNetwork();
   }
 
-  // Check if door should be locked again
-  if (!doorLocked && millis() - doorUnlockTime > DOOR_UNLOCK_TIME) {
-    lockDoor();
+  // Handle alarm blinking and timeout
+  if (alarmActive) {
+    unsigned long currentTime = millis();
+
+    // Check if alarm duration has elapsed
+    if (currentTime - alarmStartTime >= ALARM_DURATION) {
+      // Stop alarm
+      alarmActive = false;
+      digitalWrite(BUZZER_PIN, LOW);
+      digitalWrite(LED_RED_PIN, doorLocked ? HIGH : LOW);  // Restore normal state
+      if (DEBUG_SERIAL) {
+        Serial.println("Alarm duration expired - deactivating alarm");
+      }
+    } else {
+      // Blink buzzer and red LED
+      if (currentTime - lastAlarmBlinkTime >= ALARM_BLINK_INTERVAL) {
+        alarmBlinkState = !alarmBlinkState;
+        digitalWrite(BUZZER_PIN, alarmBlinkState ? HIGH : LOW);
+        digitalWrite(LED_RED_PIN, alarmBlinkState ? HIGH : LOW);
+        lastAlarmBlinkTime = currentTime;
+      }
+    }
   }
 
-  // Check for new NFC card
-  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };
-  uint8_t uidLength;
+  // Only process normal operations if alarm is not active
+  if (!alarmActive) {
+    // Check Ethernet connection
+    if (Ethernet.linkStatus() == LinkOFF) {
+      if (DEBUG_SERIAL) {
+        Serial.println("Ethernet disconnected. Reconnecting...");
+      }
+      connectToNetwork();
+    }
 
-  if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)) {
-    if (millis() - lastCardTime > CARD_READ_DELAY) {
-      handleNFCCard(uid, uidLength);
-      lastCardTime = millis();
+    // Check if door should be locked again
+    if (!doorLocked && millis() - doorUnlockTime > DOOR_UNLOCK_TIME) {
+      lockDoor();
+    }
+
+    // Check for new NFC card
+    uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };
+    uint8_t uidLength;
+
+    if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)) {
+      if (millis() - lastCardTime > CARD_READ_DELAY) {
+        handleNFCCard(uid, uidLength);
+        lastCardTime = millis();
+      }
     }
   }
 
@@ -359,6 +407,101 @@ void beep(int count, int duration) {
     if (i < count - 1) {
       delay(100);
     }
+  }
+}
+
+void reportTamperAttempt() {
+  if (DEBUG_SERIAL) {
+    Serial.println("Reporting tamper attempt to server...");
+  }
+
+  if (Ethernet.linkStatus() == LinkOFF) {
+    if (DEBUG_SERIAL) {
+      Serial.println("No Ethernet connection - cannot report tamper");
+    }
+    return;
+  }
+
+  // Create JSON document
+  DynamicJsonDocument doc(16384);
+  doc["clientId"] = CLIENT_ID;
+  doc["type"] = "tamper";
+  doc["timestamp"] = millis();
+
+#ifdef ENABLE_CAMERA
+  if (DEBUG_SERIAL) {
+    Serial.println("Capturing tamper image...");
+  }
+
+  String imageBase64 = captureImageBase64();
+
+  if (imageBase64.length() > 0) {
+    doc["image"] = imageBase64;
+  }
+#endif
+
+  // Measure JSON size for Content-Length
+  size_t contentLen = measureJson(doc);
+
+  if (DEBUG_SERIAL) {
+    Serial.print("Connecting to server for tamper report...");
+    Serial.print("Content-Length: ");
+    Serial.println(contentLen);
+  }
+
+  if (!networkClient.connect(SERVER_HOST, SERVER_PORT)) {
+    if (DEBUG_SERIAL) {
+      Serial.println("Connection failed");
+    }
+    return;
+  }
+
+  networkClient.setTimeout(15000);
+
+  if (DEBUG_SERIAL) {
+    Serial.println("Connected! Sending tamper report...");
+  }
+
+  // Send HTTP headers
+  networkClient.print(
+    String("POST /alarm/tamper HTTP/1.1\r\n") +
+    "Host: " + String(SERVER_HOST) + "\r\n" +
+    "Content-Type: application/json\r\n" +
+    "Connection: close\r\n" +
+    "Content-Length: " + String(contentLen) + "\r\n" +
+    "\r\n"
+  );
+
+  // Stream JSON directly to socket
+  serializeJson(doc, networkClient);
+
+  if (DEBUG_SERIAL) {
+    Serial.println("Tamper report sent, waiting for response...");
+  }
+
+  // Read response headers
+  String header;
+  unsigned long t0 = millis();
+  while (millis() - t0 < 15000) {
+    while (networkClient.available()) {
+      char c = networkClient.read();
+      header += c;
+      if (header.endsWith("\r\n\r\n")) goto tamper_headers_done;
+    }
+    if (!networkClient.connected()) break;
+    delay(1);
+  }
+tamper_headers_done:
+
+  if (DEBUG_SERIAL) {
+    Serial.println("Tamper report response:");
+    Serial.println(header);
+  }
+
+  networkClient.stop();
+
+  if (DEBUG_SERIAL) {
+    Serial.println("Tamper report completed");
   }
 }
 

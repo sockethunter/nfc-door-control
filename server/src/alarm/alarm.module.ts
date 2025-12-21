@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025 sockethunter
  *
- * This file is part of nfc-door-control 
+ * This file is part of nfc-door-control
  * (see https://github.com/sockethunter/nfc-door-control).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-export { LoginPage } from './LoginPage';
-export { DashboardPage } from './DashboardPage';
-export { DoorsPage } from './DoorsPage';
-export { TagsPage } from './TagsPage';
-export { HistoryPage } from './HistoryPage';
-export { AlarmsPage } from './AlarmsPage';
+import { Module } from '@nestjs/common';
+import { AlarmController } from './alarm.controller';
+import { AlarmService } from './alarm.service';
+import { DatabaseModule } from '../database/database.module';
+
+@Module({
+  imports: [DatabaseModule],
+  controllers: [AlarmController],
+  providers: [AlarmService],
+  exports: [AlarmService],
+})
+export class AlarmModule {}

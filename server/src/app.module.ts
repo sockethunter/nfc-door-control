@@ -23,6 +23,7 @@ import { AuthModule } from './auth/auth.module';
 import { TagsModule } from './tags/tags.module';
 import { DoorsModule } from './doors/doors.module';
 import { AccessHistoryModule } from './access-history/access-history.module';
+import { AlarmModule } from './alarm/alarm.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AccessHistoryModule } from './access-history/access-history.module';
     TagsModule,
     DoorsModule,
     AccessHistoryModule,
+    AlarmModule,
   ],
 })
 export class AppModule {}

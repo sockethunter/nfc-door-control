@@ -145,4 +145,41 @@ export const accessHistoryApi = {
   },
 };
 
+export const alarmApi = {
+  getAll: async (unresolved?: boolean): Promise<any[]> => {
+    const url = unresolved ? '/alarm/tamper?unresolved=true' : '/alarm/tamper';
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  getStats: async (): Promise<{ total: number; unresolved: number; resolved: number }> => {
+    const response = await api.get('/alarm/tamper/statistics');
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<any> => {
+    const response = await api.get(`/alarm/tamper/${id}`);
+    return response.data;
+  },
+
+  getByClientId: async (clientId: string): Promise<any[]> => {
+    const response = await api.get(`/alarm/tamper/client/${clientId}`);
+    return response.data;
+  },
+
+  update: async (id: number, data: { resolved?: boolean; notes?: string }): Promise<any> => {
+    const response = await api.patch(`/alarm/tamper/${id}`, data);
+    return response.data;
+  },
+
+  markAsResolved: async (id: number, notes?: string): Promise<any> => {
+    const response = await api.patch(`/alarm/tamper/${id}/resolve`, { notes });
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/alarm/tamper/${id}`);
+  },
+};
+
 export default api;

@@ -27,6 +27,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { DoorsPage } from './pages/DoorsPage';
 import { TagsPage } from './pages/TagsPage';
 import { HistoryPage } from './pages/HistoryPage';
+import { AlarmsPage } from './pages/AlarmsPage';
 import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
@@ -104,6 +105,7 @@ function App() {
             <Route path="/doors" element={<DoorsPage />} />
             <Route path="/tags" element={<TagsPage />} />
             <Route path="/history" element={<HistoryPage />} />
+            <Route path="/alarms" element={<AlarmsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

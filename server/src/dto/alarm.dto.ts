@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025 sockethunter
  *
- * This file is part of nfc-door-control 
+ * This file is part of nfc-door-control
  * (see https://github.com/sockethunter/nfc-door-control).
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-export { LoginPage } from './LoginPage';
-export { DashboardPage } from './DashboardPage';
-export { DoorsPage } from './DoorsPage';
-export { TagsPage } from './TagsPage';
-export { HistoryPage } from './HistoryPage';
-export { AlarmsPage } from './AlarmsPage';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+
+export class ReportTamperDto {
+  @IsString()
+  @IsNotEmpty()
+  clientId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  type: string;
+
+  @IsNumber()
+  @IsOptional()
+  timestamp?: number;
+
+  @IsString()
+  @IsOptional()
+  image?: string;  // Base64 encoded image
+}
+
+export class UpdateTamperLogDto {
+  @IsBoolean()
+  @IsOptional()
+  resolved?: boolean;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+}

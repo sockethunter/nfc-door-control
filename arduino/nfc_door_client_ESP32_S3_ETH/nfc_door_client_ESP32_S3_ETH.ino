@@ -37,11 +37,17 @@ unsigned long lastCardTime = 0;
 bool doorLocked = true;
 unsigned long doorUnlockTime = 0;
 
+volatile bool nfcCardAvailable = false;
+uint8_t nfcUid[7];
+uint8_t nfcUidLength = 0;
+
 // Alarm system variables
-bool alarmActive = false;
+volatile bool alarmActive = false;
 unsigned long alarmStartTime = 0;
 unsigned long lastAlarmBlinkTime = 0;
 bool alarmBlinkState = false;
+
+void nfcTask(void *param);
 
 void setup() {
   if (DEBUG_SERIAL) {
@@ -54,7 +60,7 @@ void setup() {
   pinMode(LED_GREEN_PIN, OUTPUT);
   pinMode(LED_RED_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(CONTACT_PIN, INPUT_PULLUP);  // Pullup for alarm contact (HIGH = normal)
+  pinMode(CONTACT_PIN, INPUT); // (HIGH = normal)
 
   // Initial state
   digitalWrite(RELAY_PIN, LOW);   // Door locked
@@ -65,7 +71,16 @@ void setup() {
   Wire.begin(SDA_PIN, SCL_PIN);
   nfc.begin();
   nfc.SAMConfig();
-  nfc.setPassiveActivationRetries(0x01);
+
+  xTaskCreatePinnedToCore(
+    nfcTask,
+    "NFC Task",
+    4096,
+    NULL,
+    1,
+    NULL,
+    0
+  );
 
   // Connect to network
   connectToNetwork();
@@ -107,7 +122,7 @@ void loop() {
     if (currentTime - alarmStartTime >= ALARM_DURATION) {
       // Stop alarm
       alarmActive = false;
-      digitalWrite(BUZZER_PIN, LOW);
+      noTone(BUZZER_PIN);
       digitalWrite(LED_RED_PIN, doorLocked ? HIGH : LOW);  // Restore normal state
       if (DEBUG_SERIAL) {
         Serial.println("Alarm duration expired - deactivating alarm");
@@ -116,7 +131,11 @@ void loop() {
       // Blink buzzer and red LED
       if (currentTime - lastAlarmBlinkTime >= ALARM_BLINK_INTERVAL) {
         alarmBlinkState = !alarmBlinkState;
-        digitalWrite(BUZZER_PIN, alarmBlinkState ? HIGH : LOW);
+        if (alarmBlinkState) {
+          tone(BUZZER_PIN, ALARM_FREQUENCY);
+        } else {
+          noTone(BUZZER_PIN);
+        }
         digitalWrite(LED_RED_PIN, alarmBlinkState ? HIGH : LOW);
         lastAlarmBlinkTime = currentTime;
       }
@@ -138,19 +157,33 @@ void loop() {
       lockDoor();
     }
 
-    // Check for new NFC card
-    uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };
-    uint8_t uidLength;
-
-    if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)) {
+    if (nfcCardAvailable) {
+      nfcCardAvailable = false;
       if (millis() - lastCardTime > CARD_READ_DELAY) {
-        handleNFCCard(uid, uidLength);
+        handleNFCCard(nfcUid, nfcUidLength);
         lastCardTime = millis();
       }
     }
   }
 
   delay(100);
+}
+
+void nfcTask(void *param) {
+  for (;;) {
+    if (!alarmActive) {
+      uint8_t uid[7];
+      uint8_t uidLength;
+
+      if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)) {
+        memcpy(nfcUid, uid, uidLength);
+        nfcUidLength = uidLength;
+        nfcCardAvailable = true;
+      }
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(20));
+  }
 }
 
 void connectToNetwork() {
@@ -402,9 +435,9 @@ void denyAccess() {
 
 void beep(int count, int duration) {
   for (int i = 0; i < count; i++) {
-    digitalWrite(BUZZER_PIN, HIGH);
+    tone(BUZZER_PIN, BEEP_FREQUENCY, duration);
     delay(duration);
-    digitalWrite(BUZZER_PIN, LOW);
+    noTone(BUZZER_PIN);
     if (i < count - 1) {
       delay(100);
     }

@@ -45,17 +45,17 @@ const char* CLIENT_ID = "door-001";           // Unique client identifier
 
 // Hardware Pins
 #define RELAY_PIN       2
-#define LED_GREEN_PIN   12
-#define LED_RED_PIN     13
-#define BUZZER_PIN      14
-#define CONTACT_PIN     15
+#define LED_GREEN_PIN   17
+#define LED_RED_PIN     0
+#define BUZZER_PIN      35
+#define CONTACT_PIN     16
 
 // I2C Configuration for PN532
-#define SDA_PIN         21  // Default I2C SDA pin for ESP32
-#define SCL_PIN         22  // Default I2C SCL pin for ESP32
+#define SDA_PIN         34  // Default I2C SDA pin for ESP32
+#define SCL_PIN         33  // Default I2C SCL pin for ESP32
 
 // Camera Configuration (Optional - uncomment to enable camera)
-// #define ENABLE_CAMERA
+#define ENABLE_CAMERA
 #ifdef ENABLE_CAMERA
   #define PWDN_GPIO_NUM  -1
   #define RESET_GPIO_NUM -1
@@ -87,8 +87,16 @@ const char* CLIENT_ID = "door-001";           // Unique client identifier
 #define ALARM_DURATION       300000  // Alarm duration when contact is lost (ms) - 5 minutes
 #define ALARM_BLINK_INTERVAL 500     // Blink interval for alarm (ms)
 
+// Buzzer Configuration
+#define BEEP_FREQUENCY       1500    // Normal beep frequency in Hz
+#define ALARM_FREQUENCY      1750    // Alarm beep frequency in Hz
+
 // Debug Configuration
 #define DEBUG_SERIAL     true
 #define SERIAL_BAUD      115200
+
+#define PN532_IRQ_PIN    36
+#define PN532_RESET_PIN  -1
+#define I2C_CLOCK_HZ     100000
 
 #endif

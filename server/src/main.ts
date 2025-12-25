@@ -24,7 +24,7 @@ import { ValidationExceptionFilter } from './filters/validation-exception.filter
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true, // Remove properties that are not in DTO
     forbidNonWhitelisted: true, // Throw error if non-whitelisted properties are provided
@@ -33,13 +33,13 @@ async function bootstrap() {
       enableImplicitConversion: true, // Allow implicit type conversion
     },
   }));
-  
+
   app.useGlobalFilters(new ValidationExceptionFilter());
   app.enableCors();
-  
+
   const port = process.env.PORT || 3005;
-  await app.listen(port);
-  
+  await app.listen(port, "0.0.0.0");
+
   console.log(`NFC Door Control API running on port ${port}`);
 }
 bootstrap();

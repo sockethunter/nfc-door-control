@@ -14,7 +14,10 @@
     "active": "Aktiv",
     "inactive": "Inaktiv",
     "yes": "Ja",
-    "no": "Nein"
+    "no": "Nein",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "showing": "Zeige"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -84,7 +87,8 @@
     "filterByDoor": "Nach Tür filtern",
     "filterByTag": "Nach Tag filtern",
     "allDoors": "Alle Türen",
-    "allTags": "Alle Tags"
+    "allTags": "Alle Tags",
+    "confirmDelete": "Sind Sie sicher, dass Sie diesen Verlaufseintrag löschen möchten?"
   },
   "alarms": {
     "title": "Manipulations-Alarme",

@@ -109,4 +109,10 @@ export class AccessHistoryService {
       successRate: totalAccess > 0 ? (successfulAccess / totalAccess) * 100 : 0,
     };
   }
+
+  async delete(id: number) {
+    return this.prisma.accessHistory.delete({
+      where: { id },
+    });
+  }
 }

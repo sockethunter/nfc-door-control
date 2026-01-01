@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { accessHistoryApi } from '../services/api';
@@ -27,6 +27,7 @@ import { formatDateTime } from '../utils/dateTime';
 
 export const HistoryPage: React.FC = () => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
   const doorFilter = searchParams.get('door');
@@ -41,6 +42,23 @@ export const HistoryPage: React.FC = () => {
       return accessHistoryApi.getAll(page, limit);
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: accessHistoryApi.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['access-history'] });
+    },
+  });
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm(t('history.confirmDelete'))) {
+      try {
+        await deleteMutation.mutateAsync(id);
+      } catch (error) {
+        console.error('Failed to delete entry:', error);
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -89,7 +107,7 @@ export const HistoryPage: React.FC = () => {
         <>
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {t('common.loading')} {((page - 1) * limit) + 1} - {Math.min(page * limit, data.total)} / {data.total}
+              {t('common.showing')} {((page - 1) * limit) + 1} - {Math.min(page * limit, data.total)} / {data.total}
             </p>
             <div className="flex gap-2">
               <Button
@@ -98,7 +116,7 @@ export const HistoryPage: React.FC = () => {
                 disabled={page === 1}
                 onClick={() => setPage(page - 1)}
               >
-                {t('common.cancel')}
+                {t('common.previous')}
               </Button>
               <Button
                 size="sm"
@@ -106,7 +124,7 @@ export const HistoryPage: React.FC = () => {
                 disabled={page >= data.pages}
                 onClick={() => setPage(page + 1)}
               >
-                {t('common.add')}
+                {t('common.next')}
               </Button>
             </div>
           </div>
@@ -133,6 +151,9 @@ export const HistoryPage: React.FC = () => {
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Image
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('common.delete')}
                     </th>
                   </tr>
                 </thead>
@@ -185,6 +206,16 @@ export const HistoryPage: React.FC = () => {
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          onClick={() => handleDelete(entry.id)}
+                          disabled={deleteMutation.isPending}
+                        >
+                          {t('common.delete')}
+                        </Button>
                       </td>
                     </tr>
                   ))}

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { Controller, Get, Query, Param, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Query, Param, UseGuards, ParseIntPipe, Delete } from '@nestjs/common';
 import { AccessHistoryService } from './access-history.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AccessHistoryQueryDto } from '../dto/access-history.dto';
@@ -51,5 +51,10 @@ export class AccessHistoryController {
     @Query() query: AccessHistoryQueryDto
   ) {
     return this.accessHistoryService.findByTag(tagId, query.page, query.limit);
+  }
+
+  @Delete(':id')
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.accessHistoryService.delete(id);
   }
 }

@@ -14,7 +14,10 @@
     "active": "Active",
     "inactive": "Inactive",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "previous": "Previous",
+    "next": "Next",
+    "showing": "Showing"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -84,7 +87,8 @@
     "filterByDoor": "Filter by Door",
     "filterByTag": "Filter by Tag",
     "allDoors": "All Doors",
-    "allTags": "All Tags"
+    "allTags": "All Tags",
+    "confirmDelete": "Are you sure you want to delete this access history entry?"
   },
   "alarms": {
     "title": "Tamper Alarms",

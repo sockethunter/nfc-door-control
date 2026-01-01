@@ -143,6 +143,10 @@ export const accessHistoryApi = {
     const response = await api.get(`/access-history/tag/${tagId}?page=${page}&limit=${limit}`);
     return response.data;
   },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/access-history/${id}`);
+  },
 };
 
 export const alarmApi = {
